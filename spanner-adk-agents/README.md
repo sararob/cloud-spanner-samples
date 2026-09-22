@@ -16,6 +16,7 @@ While this example shows a healthcare use case, the capabilities demonstrated in
 2. The following APIs must be enabled:
    ```bash
    gcloud services enable spanner.googleapis.com aiplatform.googleapis.com
+   ```
 
 ## Environment variables
 
@@ -52,7 +53,7 @@ Execute the queries provided in `setup.sql` to create the `Providers`, `Patients
 
 **Important**: When running the `CREATE OR REPLACE MODEL TextEmbeddingModel` statement, ensure you replace `YOUR_PROJECT_ID` with your actual Google Cloud Project ID.
 
-Run the final `UPDATE` statement in `setup.sql` to generate populate the vector embeddings into the `DoctorNotesEmbedding` column.
+Run the final `UPDATE` statement in `setup.sql` to generate the vector embeddings and populate them into the `DoctorNotesEmbedding` column.
 
 ## Running the Agents Locally
 
