@@ -27,6 +27,21 @@ from google.adk.tools.spanner.settings import SpannerToolSettings
 from google.adk.tools.spanner.spanner_credentials import SpannerCredentialsConfig
 from google.adk.tools.spanner.spanner_toolset import SpannerToolset
 
+# --- Environment Variable Validation ---
+REQUIRED_ENV_VARS = [
+    "GOOGLE_CLOUD_PROJECT",
+    "GOOGLE_CLOUD_LOCATION",
+    "GOOGLE_GENAI_USE_VERTEXAI",
+    "SPANNER_INSTANCE_ID",
+    "SPANNER_DATABASE_ID"
+]
+
+missing_vars = [var for var in REQUIRED_ENV_VARS if not os.environ.get(var)]
+if missing_vars:
+    print(f"\n[ERROR] Missing required environment variables: {', '.join(missing_vars)}", flush=True)
+    print("Please set them before running the agent. See the README.md for instructions.\n", flush=True)
+    sys.exit(1)
+
 PROJECT_ID = os.environ.get("GOOGLE_CLOUD_PROJECT")
 INSTANCE_ID = os.environ.get("SPANNER_INSTANCE_ID", "healthcare")
 DATABASE_ID = os.environ.get("SPANNER_DATABASE_ID", "medical-db")
