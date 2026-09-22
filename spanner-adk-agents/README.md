@@ -41,14 +41,14 @@ export SPANNER_DATABASE_ID="medical-db"
 
 Run the following commands using the `gcloud` CLI to create a Spanner instance and DB to use for this sample:
 
-# Create the Spanner instance
+### Create the Spanner instance
 gcloud spanner instances create $SPANNER_INSTANCE_ID \
     --config=regional-us-central1 \
     --description="ADK Sample Instance" \
     --edition=enterprise \
     --processing-units=1000
 
-# Create the database
+### Create the database
 gcloud spanner databases create $SPANNER_DATABASE_ID \
     --instance=$SPANNER_INSTANCE_ID
 

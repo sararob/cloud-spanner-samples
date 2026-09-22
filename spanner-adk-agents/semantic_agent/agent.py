@@ -68,7 +68,7 @@ credentials_config = SpannerCredentialsConfig(
 # Because text-embedding-005 uses a regional endpoint (i.e. 'us-central1')
 # and gemini-3.8-flash uses a multi-regional endpoint (i.e. 'us')
 # We need the following patch to pass the correct region to the embedding model
-genai_client = Client(vertexai=True, project=PROJECT_ID, location="us-central1")
+regional_client = Client(vertexai=True, project=PROJECT_ID, location="us-central1")
 async def _patched_embed_contents_async(
         vertex_ai_embedding_model_name: str,
         contents: list[str],
@@ -77,7 +77,7 @@ async def _patched_embed_contents_async(
     ):
         return await asyncio.to_thread(
             spanner_utils.embed_contents, vertex_ai_embedding_model_name, contents,
-            output_dimensionality=output_dimensionality, genai_client=genai_client,
+            output_dimensionality=output_dimensionality, genai_client=regional_client,
         )
 spanner_utils.embed_contents_async = _patched_embed_contents_async
 
