@@ -52,18 +52,7 @@ DATABASE_ID = os.environ.get("SPANNER_DATABASE_ID", "medical-db")
 if hasattr(spanner_client_module, "_close_spanner_resources"):
     spanner_client_module._close_spanner_resources = lambda *args, **kwargs: None
 
-# Because text-embedding-005 uses a regional endpoint (i.e. 'us-central1')
-# and gemini-3.8-flash uses a multi-regional endpoint (i.e. 'us')
-# We need the following patch to pass the correct region to the embedding model
-async def _patched_embed_contents_async(vertex_ai_embedding_model_name: str, contents: list[str], output_dimensionality: int | None = None, genai_client: Client | None = None):
-    regional_client = Client(vertexai=True, project=PROJECT_ID, location="us-central1")
-    return await asyncio.to_thread(
-        spanner_utils.embed_contents, vertex_ai_embedding_model_name, contents,
-        output_dimensionality=output_dimensionality, genai_client=regional_client,
-    )
-spanner_utils.embed_contents_async = _patched_embed_contents_async
-
-# --- Auth ---
+# --- Auth and credentials config ---
 try:
     application_default_credentials, _ = google.auth.default()
     if not application_default_credentials.valid:
@@ -72,10 +61,25 @@ except Exception as e:
     print(f"\n[ERROR] Failed to authenticate: {e}", flush=True)
     sys.exit(1)
 
-# --- Spanner semantic search config ---
 credentials_config = SpannerCredentialsConfig(
     credentials=application_default_credentials
 )
+
+# Because text-embedding-005 uses a regional endpoint (i.e. 'us-central1')
+# and gemini-3.8-flash uses a multi-regional endpoint (i.e. 'us')
+# We need the following patch to pass the correct region to the embedding model
+genai_client = Client(vertexai=True, project=PROJECT_ID, location="us-central1")
+async def _patched_embed_contents_async(
+        vertex_ai_embedding_model_name: str,
+        contents: list[str],
+        output_dimensionality: int | None = None,
+        genai_client: Client | None = None
+    ):
+        return await asyncio.to_thread(
+            spanner_utils.embed_contents, vertex_ai_embedding_model_name, contents,
+            output_dimensionality=output_dimensionality, genai_client=genai_client,
+        )
+spanner_utils.embed_contents_async = _patched_embed_contents_async
 
 my_vector_store_settings = SpannerVectorStoreSettings(
     project_id=PROJECT_ID,
