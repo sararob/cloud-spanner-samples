@@ -12,8 +12,6 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
--- IMPORTANT: Before copying this into Spanner Studio, replace YOUR_PROJECT_ID with the ID of the Google Cloud project you are using to run this sample
-
 -- 1. Create the independent Providers table
 CREATE TABLE Providers (
     ProviderId INT64 NOT NULL,
@@ -104,21 +102,3 @@ VALUES
   (9, 209, 9, 'Heavy Duty Masking Tape (Apply to forehead)', DATE '2026-10-09'),
   (10, 210, 10, 'Chocolate-Covered Broccoli (To trick the system, eat with caution)', DATE '2026-10-10');
 
--- 6. Create a text embedding model
-CREATE OR REPLACE MODEL TextEmbeddingModel
-INPUT(content STRING(MAX))
-OUTPUT(embeddings STRUCT<values ARRAY<FLOAT32>>)
-REMOTE OPTIONS(
-  endpoint = '//aiplatform.googleapis.com/projects/YOUR_PROJECT_ID/locations/us-central1/publishers/google/models/text-embedding-005'
-);
-
--- 7. Generate and insert vector embeddings
-UPDATE Appointments
-SET DoctorNotesEmbedding = (
-  SELECT embeddings.values
-  FROM ML.PREDICT(
-    MODEL TextEmbeddingModel,
-    (SELECT DoctorNotes AS content)
-  )
-)
-WHERE DoctorNotes IS NOT NULL AND DoctorNotesEmbedding IS NULL;

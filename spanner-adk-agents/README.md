@@ -37,6 +37,22 @@ export SPANNER_INSTANCE_ID="healthcare"
 export SPANNER_DATABASE_ID="medical-db"
 ```
 
+## Create Spanner instance and database
+
+Run the following commands using the `gcloud` CLI to create a Spanner instance and DB to use for this sample:
+
+# Create the Spanner instance
+gcloud spanner instances create $SPANNER_INSTANCE_ID \
+    --config=regional-us-central1 \
+    --description="ADK Sample Instance" \
+    --edition=enterprise \
+    --processing-units=1000
+
+# Create the database
+gcloud spanner databases create $SPANNER_DATABASE_ID \
+    --instance=$SPANNER_INSTANCE_ID
+
+
 ## Setup
 
 1. Install Dependencies:
@@ -46,14 +62,13 @@ Clone the repository, navigate to this directory, and install the required Pytho
 pip install -r requirements.txt
 ```
 
-2. Create a Spanner instance, database, tables, and load data:
-Open Spanner Studio for your database in the Google Cloud Console.
+2. Create tables in your database and load data:
 
-Execute the queries provided in `setup.sql` to create the `Providers`, `Patients`, `Appointments`, and `Prescriptions` tables, and to populate them with sample data.
+First, execute the queries provided in `creaet_tables.sql` to create the `Providers`, `Patients`, `Appointments`, and `Prescriptions` tables and populate them with sample data.
+
+Next, run the queries in `embeddings.sql` to generate the vector embeddings and populate them into the `DoctorNotesEmbedding` column.
 
 **Important**: When running the `CREATE OR REPLACE MODEL TextEmbeddingModel` statement, ensure you replace `YOUR_PROJECT_ID` with your actual Google Cloud Project ID.
-
-Run the final `UPDATE` statement in `setup.sql` to generate the vector embeddings and populate them into the `DoctorNotesEmbedding` column.
 
 ## Running the Agents Locally
 
@@ -70,3 +85,12 @@ adk web --allow_origins="regex:.*" --session_service_uri="memory://" .
 ```
 
 Navigate to http://127.0.0.1:8000 in your browser. Use the dropdown at the top of the interface to switch between the different agents and interact with them.
+
+## Cleanup
+
+To avoid incurring unexpected charges to your Google Cloud billing account, make sure to delete the Spanner instance when you are done testing this sample. 
+
+Deleting the instance will also automatically delete the `medical-db` database and all of its data.
+
+```bash
+gcloud spanner instances delete $SPANNER_INSTANCE_ID --quiet
